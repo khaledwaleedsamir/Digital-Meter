@@ -1,31 +1,50 @@
 #include <EmonLib.h>
 #include <LiquidCrystal.h>
+/**********************************************************************************************************************
+ *                                              CONFIGURATION MACROS
+ *********************************************************************************************************************/
+ /* LCD Pins */
+ #define LCD_RS_PIN 7
+ #define LCD_EN_PIN 6
+ #define LCD_D4_PIN 5
+ #define LCD_D5_PIN 4
+ #define LCD_D6_PIN 3
+ #define LCD_D7_PIN 8
+/* Voltage Sensor and Current Sensor Pins MUST BE ANALOG PINS */
+#define VOLT_SENSOR_PIN 14 /* Pin 14 is Analog pin 0: A0 */
+#define CURR_SENSOR_PIN 16 /* Pin 16 is Analog pin 2: A2 */
+/* Define LED and PushButton Pins */
+#define BUTTON_PIN  2 // Button pin must be an interrupt pin
+#define LED_PIN  12   
+#define BUTTON_DEBOUNCE_DELAY 80 // PB debouncing time protection in ms
+/* Calibration Functions Macros*/
+#define TARGET_VOLTAGE 220.0
+#define TARGET_CURRENT 0.4545
+#define CALIBRATION_ITERATIONS 100
+#define VOLTAGE_CALIBRATION_STEP 0.05
+#define CURRENT_CALIBRATION_STEP 0.05
+#define VOLTAGE_ERROR 0.1
+#define CURRENT_ERROR 0.05
+/***********************************************************************************************************************/
 
-/* Create LCD Instance and Initalize LCD Pins
-   Control Pins: (RS -> Pin 7) (EN -> Pin 6)
-   Data Pins (D4 -> Pin 5) (D5 -> Pin 4) (D6 -> Pin 3) (D7 -> Pin 8) */
-LiquidCrystal lcd(7, 6, 5, 4, 3, 8);
+
+/* Create LCD Instance and Initalize LCD Pins */
+LiquidCrystal lcd(LCD_RS_PIN, LCD_EN_PIN, LCD_D4_PIN, LCD_D5_PIN, LCD_D6_PIN, LCD_D7_PIN);
 
 /* Create Energy Monitor Instance */
 EnergyMonitor emon;
 
-/* Voltage Sensor and Current Sensor Pins */
-#define VoltSensorPin 14 /* Pin 14 is Analog pin 0: A0 */
-#define CurrSensorPin 16 /* Pin 16 is Analog pin 2: A2 */
-
 /* Voltage and Current sensors Calibration Variables */
 #define VoltCalibration 150   // Used by default
 #define CurrCalibration 21.5  // Used by default
-float vCalib = 149;           // Used in Calibration function
-float cCalib = 21;            // Used in Calibration function
+float vCalib = 150;           // Used in Calibration function
+float cCalib = 21.5;          // Used in Calibration function
 
 /* Variables for storing Electricity Usage in kWh */
 float kWh = 0;
 unsigned long lastmillis = millis();
 
-/* Define LED and PushButton Pins */
-#define BUTTON_PIN  2 // Pin connected to the pushbutton
-#define LED_PIN  12   // Pin connected to the LED
+/* Pushbutton flag variable */
 bool CalibrationBtnPressed = false; //PushButton Flag
 
 void setup() 
@@ -33,8 +52,8 @@ void setup()
   /* Begin Serial Communication */
   Serial.begin(9600);
   /* Initalize Sensors pins */
-  emon.voltage(VoltSensorPin, VoltCalibration, 1.7); // Voltage: input pin, calibration, phase_shift
-  emon.current(CurrSensorPin, CurrCalibration); // Current: input pin, calibration.
+  emon.voltage(VOLT_SENSOR_PIN, VoltCalibration, 1.7); // Voltage: input pin, calibration, phase_shift
+  emon.current(CURR_SENSOR_PIN, CurrCalibration); // Current: input pin, calibration.
   /* Intialize 20x4 LCD */
   lcd.begin(20, 4);
   lcd.setCursor(0, 0);
@@ -107,16 +126,16 @@ void VoltageCalibration()
   lcd.print("....");
   lcd.blink();
   digitalWrite(LED_PIN, HIGH); // Turn on LED (turns off after the whole calibration process is complete)
-  float targetVoltage = 220; // Target RMS voltage for calibration
-  float vCalibStep = 0.05;      // Calibration step size
+  float targetVoltage = TARGET_VOLTAGE; // Target RMS voltage for calibration
+  float vCalibStep = VOLTAGE_CALIBRATION_STEP;      // Calibration step size
 
-  for (int i = 0; i < 100; i++) 
+  for (int i = 0; i < CALIBRATION_ITERATIONS; i++) 
   {
-    emon.voltage(VoltSensorPin, vCalib, 1.7); // Set voltage calibration
-    emon.current(CurrSensorPin, CurrCalibration); // Set current calibration
+    emon.voltage(VOLT_SENSOR_PIN, vCalib, 1.7); // Set voltage calibration
+    emon.current(CURR_SENSOR_PIN, CurrCalibration); // Set current calibration
     emon.calcVI(20, 2000); // Calculate voltage and current values
 
-    if (abs(emon.Vrms - targetVoltage) < 0.1) 
+    if (abs(emon.Vrms - targetVoltage) < VOLTAGE_ERROR) 
     { 
       // Check if close to target voltage
       lcd.clear();
@@ -141,16 +160,16 @@ void CurrentCalibration()
   lcd.print("....");
   lcd.blink();
 
-  float targetCurrent = 0.4545; // Target RMS current for calibration
-  float cCalibStep = 0.01;     // Calibration step size
+  float targetCurrent = TARGET_CURRENT; // Target RMS current for calibration
+  float cCalibStep = CURRENT_CALIBRATION_STEP;     // Calibration step size
 
-  for (int i = 0; i < 100; i++)
+  for (int i = 0; i < CALIBRATION_ITERATIONS; i++)
   { 
-    emon.voltage(VoltSensorPin, vCalib, 1.7); // Set voltage calibration
-    emon.current(CurrSensorPin, cCalib);      // Set current calibration
+    emon.voltage(VOLT_SENSOR_PIN, vCalib, 1.7); // Set voltage calibration
+    emon.current(CURR_SENSOR_PIN, cCalib);      // Set current calibration
     emon.calcVI(20, 2000);                    // Calculate voltage and current values
 
-    if (abs(emon.Irms - targetCurrent) < 0.005) 
+    if (abs(emon.Irms - targetCurrent) < CURRENT_ERROR) 
     { // Check if close to target current
       lcd.clear();
       lcd.print("Calibration Done!");
@@ -171,7 +190,7 @@ void CurrentCalibration()
 void buttonISR() 
 {
   /* Debounce Protection */
-  delay(80);
+  delay(BUTTON_DEBOUNCE_DELAY);
   if(digitalRead(BUTTON_PIN) != 0)
   {
     return; 
@@ -179,11 +198,3 @@ void buttonISR()
   /* Changing Button Flag */
   CalibrationBtnPressed = true;
 }
-
-
-
-
-
-
-
-
