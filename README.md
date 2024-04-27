@@ -105,6 +105,7 @@ The project includes calibration routines (`VoltageCalibration()` and `CurrentCa
 ## Video Demonstration
 <video controls src="Photos and Videos/Digital_Meter_Hardware.mp4" title="Title"></video>
 [Watch Video Demonstration](Photos and Videos/Digital_Meter_Hardware.mp4)
+<video src='Photos and Videos/Digital_Meter_Hardware.mp4' />
 ## Contributing
 
 Contributions to this project are welcome! If you have any suggestions, improvements, or bug fixes, feel free to submit a pull request.
