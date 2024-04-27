@@ -103,7 +103,7 @@ The project includes calibration routines (`VoltageCalibration()` and `CurrentCa
    - After calibration, the Arduino will continuously measure and display RMS voltage, current, power, and cumulative energy usage (kWh) on the LCD display.
 
 ## Video Demonstration
-
+[Link to Digital Meter Hardware Video](Photos%20and%20Videos/Digital_Meter_Hardware.mp4)
 <video controls src="Photos%20and%20Videos/Digital_Meter_Hardware.mp4" title="Title"></video>
 
 ## Contributing
