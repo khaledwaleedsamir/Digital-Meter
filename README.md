@@ -1,6 +1,6 @@
 # Digital Electricity Meter with Calibration
 
-This project implements a digital electricity watthour meter using Arduino, incorporating voltage and current sensors for power measurement. It includes calibration functionality to ensure accurate measurement readings.
+This project implements a digital electricity watthour meter using Arduino.
 
 ## Table of Contents
 
@@ -8,6 +8,8 @@ This project implements a digital electricity watthour meter using Arduino, inco
 - [Components](#components)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Video Demonstration](#video-demonstration)
+- [Contributing](#contributing)
 - [Acknowledgments](#acknowledgments)
 
 ## Overview
@@ -95,10 +97,13 @@ The project includes calibration routines (`VoltageCalibration()` and `CurrentCa
          Modify the step size used for calibration adjustments. A larger step size can accelerate convergence, while a smaller step size may provide finer adjustments for stability.
       - Allowable Error Margin (`VOLTAGE_ERROR` , `CURRENT_ERROR`):
          Adjust the allowable error margin to define the tolerance level within which the calibrated values are considered acceptable. A wider error margin may allow for greater variability in readings, whereas a narrower margin may prioritize precision.     
-   - Experiment with different combinations of these parameters to optimize the calibration process. Fine-tuning these parameters can enhance calibration accuracy and ensure reliable sensor measurements.
+   - Experiment with different combinations of these parameters to optimize the calibration process.
    
 2. **Measurement**:
    - After calibration, the Arduino will continuously measure and display RMS voltage, current, power, and cumulative energy usage (kWh) on the LCD display.
+
+## Video Demonstration
+<video controls src="Photos and Videos/Digital_Meter_Hardware.mp4" title="Title"></video>
 
 ## Contributing
 
